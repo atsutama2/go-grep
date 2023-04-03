@@ -2,7 +2,7 @@
 
 BINARY_NAME=gg
 
-build:
+build: vet
 	go build -o $(BINARY_NAME) ./cmd/gg
 
 vet:
