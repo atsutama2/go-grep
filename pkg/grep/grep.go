@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type SearchResult struct {
@@ -35,7 +36,7 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
-func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sync.Mutex) {
+func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32) {
 	defer wg.Done()
 
 	file, err := os.Open(path)
@@ -75,6 +76,7 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 	}
 
 	if len(results) > 0 {
+		atomic.AddInt32(matchCount, int32(len(results))) // カウントを更新
 		relPath, _ := filepath.Rel(directory, path)
 
 		mtx.Lock()
@@ -93,6 +95,8 @@ func Grep(searchWord, directory string) error {
 
 	excludeList := []string{".git"} // 検索対象から除外するファイル/ディレクトリのリスト
 
+	var matchCount int32 // 検索結果のカウント用の変数を追加
+
 	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -110,7 +114,7 @@ func Grep(searchWord, directory string) error {
 
 		if !info.IsDir() {
 			wg.Add(1)
-			go processFile(searchWord, path, directory, &wg, &mtx)
+			go processFile(searchWord, path, directory, &wg, &mtx, &matchCount)
 		}
 		return nil
 	})
@@ -120,5 +124,8 @@ func Grep(searchWord, directory string) error {
 	}
 
 	wg.Wait()
+
+	fmt.Printf("Total matches: %d\n", matchCount) // 検索結果のカウントを表示
+
 	return nil
 }
