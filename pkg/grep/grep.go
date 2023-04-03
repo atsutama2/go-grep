@@ -5,47 +5,46 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strings"
 )
 
-func SearchFiles(pattern string, root string) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+func highlight(text, searchWord string) string {
+	return strings.ReplaceAll(text, searchWord, "\033[1;31m"+searchWord+"\033[0m")
+}
+
+func Grep(searchWord, directory string) error {
+	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+
 		if !info.IsDir() {
-			if err := grep(pattern, path); err != nil {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			scanner := bufio.NewScanner(file)
+			lineNumber := 1
+
+			for scanner.Scan() {
+				line := scanner.Text()
+				if strings.Contains(line, searchWord) {
+					relPath, _ := filepath.Rel(directory, path)
+					fmt.Printf("%s\n%d:%s\n\n", relPath, lineNumber, highlight(line, searchWord))
+				}
+				lineNumber++
+			}
+
+			if err := scanner.Err(); err != nil {
 				return err
 			}
 		}
 		return nil
 	})
-}
 
-func grep(pattern string, path string) error {
-	file, err := os.Open(path)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return err
-	}
-
-	scanner := bufio.NewScanner(file)
-	lineNumber := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		lineNumber++
-		if re.MatchString(line) {
-			absPath, _ := filepath.Abs(path)
-			fmt.Printf("%s:%d:%s\n", absPath, lineNumber, line)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
 		return err
 	}
 
