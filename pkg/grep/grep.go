@@ -14,7 +14,7 @@ func highlight(text, searchWord string) string {
 }
 
 func colorPath(path string) string {
-	return "\033[1;34m" + path + "\033[0m"
+	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
 func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sync.Mutex) {
