@@ -4,9 +4,16 @@
 [![codecov](https://codecov.io/gh/atsutama2/go-grep/branch/main/graph/badge.svg?token=DPGXS4UDAP)](https://codecov.io/gh/atsutama2/go-grep)
 
 高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
+---
+`go-grep` is a fast and versatile text search tool written in Go as a command-line tool. It efficiently searches text within files and directories, matching without regard to case, and allowing exclusion of specific files or directories.
 
 ## Features
 
+- 検索パターンを含む行番号を表示します。
+- 検索パターンを含むファイルの相対パスを表示します。
+- ディレクトリが指定されていない場合は現在のディレクトリから検索を開始します。
+- 出力に検索パターンをハイライト表示します。
+---
 - Displays line numbers containing the search pattern.
 - Displays the relative file path of the file containing the search pattern.
 - Starts the search from the current directory if no directory is specified.
