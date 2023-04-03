@@ -9,6 +9,11 @@ import (
 	"sync"
 )
 
+type SearchResult struct {
+	LineNumber int
+	Line       string
+}
+
 func highlight(text, searchWord string) string {
 	return strings.ReplaceAll(text, searchWord, "\033[1;31m"+searchWord+"\033[0m")
 }
@@ -32,14 +37,12 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 	scanner := bufio.NewScanner(file)
 	lineNumber := 1
 
+	var results []SearchResult
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, searchWord) {
-			relPath, _ := filepath.Rel(directory, path)
-
-			mtx.Lock()
-			fmt.Printf("%s\n%d:%s\n\n", colorPath(relPath), lineNumber, highlight(line, searchWord))
-			mtx.Unlock()
+			results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
 		}
 		lineNumber++
 	}
@@ -47,6 +50,18 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 	if err := scanner.Err(); err != nil {
 		mtx.Lock()
 		fmt.Printf("Error: %v\n", err)
+		mtx.Unlock()
+	}
+
+	if len(results) > 0 {
+		relPath, _ := filepath.Rel(directory, path)
+
+		mtx.Lock()
+		fmt.Printf("%s\n", colorPath(relPath))
+		for _, result := range results {
+			fmt.Printf("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
+		}
+		fmt.Println()
 		mtx.Unlock()
 	}
 }
