@@ -51,3 +51,6 @@ To use `gg`, execute the binary followed by the search pattern and the directory
 
 
 The output will display the relative file path, line number, and the line containing the search pattern, with the search pattern highlighted.
+
+## License
+MIT
