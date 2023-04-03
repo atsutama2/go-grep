@@ -1,6 +1,7 @@
 # go-grep (gg)
+[![GitHub license](https://img.shields.io/github/license/onozaty/json2csv)](https://github.com/onozaty/json2csv/blob/main/LICENSE)
 
-`go-grep` (also known as `gg`) is a simple command-line tool written in Go that mimics the functionality of the Unix `grep` command. It searches for a specified text pattern in one or more files within a given directory and its subdirectories.
+高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
 
 ## Features
 
@@ -22,7 +23,7 @@ Then, navigate to the project directory and build the `gg` binary:
 
 ```
 cd go-grep
-go build ./cmd/gg
+make build
 ```
 
 ## Usage
@@ -48,3 +49,9 @@ To use `gg`, execute the binary followed by the search pattern and the directory
 ```
 
 The output will display the relative file path, line number, and the line containing the search pattern, with the search pattern highlighted. At the end of the output, the total number of matches found will be displayed.
+![スクリーンショット 2023-04-03 18 25 46](https://user-images.githubusercontent.com/77330599/229469245-e5e40f71-263f-4f3c-9cfd-2144d9b50675.png)
+
+The output will display the relative file path, line number, and the line containing the search pattern, with the search pattern highlighted.
+
+## License
+MIT
