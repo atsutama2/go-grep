@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -14,8 +15,20 @@ type SearchResult struct {
 	Line       string
 }
 
+var lineBufferPool = &sync.Pool{
+	New: func() interface{} {
+		return &strings.Builder{}
+	},
+}
+
 func highlight(text, searchWord string) string {
-	return strings.ReplaceAll(text, searchWord, "\033[1;31m"+searchWord+"\033[0m")
+	re, err := regexp.Compile("(?i)" + regexp.QuoteMeta(searchWord))
+	if err != nil {
+		return text // エラーが発生した場合、元のテキストを返します
+	}
+	return re.ReplaceAllStringFunc(text, func(match string) string {
+		return "\033[1;31m" + match + "\033[0m"
+	})
 }
 
 func colorPath(path string) string {
@@ -41,9 +54,17 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, searchWord) {
+
+		lineBuffer := lineBufferPool.Get().(*strings.Builder)
+		lineBuffer.Reset()
+		lineBuffer.WriteString(strings.ToLower(line))
+		lowerCaseLine := lineBuffer.String()
+
+		if strings.Contains(lowerCaseLine, strings.ToLower(searchWord)) {
 			results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
 		}
+
+		lineBufferPool.Put(lineBuffer)
 		lineNumber++
 	}
 
@@ -70,9 +91,21 @@ func Grep(searchWord, directory string) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
+	excludeList := []string{".git"} // 検索対象から除外するファイル/ディレクトリのリスト
+
 	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+
+		for _, exclude := range excludeList {
+			if info.Name() == exclude {
+				if info.IsDir() {
+					return filepath.SkipDir // ディレクトリをスキップ
+				} else {
+					return nil // ファイルをスキップ
+				}
+			}
 		}
 
 		if !info.IsDir() {
