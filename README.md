@@ -35,14 +35,14 @@ sudo mv gg /usr/local/bin
 Then, navigate to the project directory and build the `gg` binary:
 
 ```
-./gg <search_word> [<directory>]
+gg <search_word> [<directory>]
 ```
 
 ## Usage
 
 To use `gg`, execute the binary followed by the search pattern and the directory to start the search (optional). If no directory is specified, the search will start from the current directory.
 ```
-./gg <search_word> [<directory>]
+gg <search_word> [<directory>]
 ```
 
 
@@ -51,13 +51,13 @@ To use `gg`, execute the binary followed by the search pattern and the directory
 1. Search for the word "Apple" in the current directory:
 
 ```
-./gg Apple
+gg Apple
 ```
 
 2. Search for the word "Apple" in the `testdata` directory:
 
 ```
-./gg Apple testdata/
+gg Apple testdata/
 ```
 
 ![スクリーンショット 2023-04-03 18 25 46](https://user-images.githubusercontent.com/77330599/229469245-e5e40f71-263f-4f3c-9cfd-2144d9b50675.png)
