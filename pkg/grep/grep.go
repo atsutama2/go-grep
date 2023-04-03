@@ -36,7 +36,7 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
-func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32) {
+func processFile(searchWord, path, directory string, classMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32) {
 	defer wg.Done()
 
 	file, err := os.Open(path)
@@ -56,16 +56,26 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		lineBuffer := lineBufferPool.Get().(*strings.Builder)
-		lineBuffer.Reset()
-		lineBuffer.WriteString(strings.ToLower(line))
-		lowerCaseLine := lineBuffer.String()
+		if classMode {
+			match, err := regexp.MatchString(`func\s+`+searchWord+`\s*\(.*\)`, line)
+			if err != nil {
+				continue
+			}
+			if match {
+				results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
+			}
+		} else {
+			lineBuffer := lineBufferPool.Get().(*strings.Builder)
+			lineBuffer.Reset()
+			lineBuffer.WriteString(strings.ToLower(line))
+			lowerCaseLine := lineBuffer.String()
 
-		if strings.Contains(lowerCaseLine, strings.ToLower(searchWord)) {
-			results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
+			if strings.Contains(lowerCaseLine, strings.ToLower(searchWord)) {
+				results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
+			}
+
+			lineBufferPool.Put(lineBuffer)
 		}
-
-		lineBufferPool.Put(lineBuffer)
 		lineNumber++
 	}
 
@@ -89,7 +99,7 @@ func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sy
 	}
 }
 
-func Grep(searchWord, directory string) error {
+func Grep(searchWord, directory string, classMode bool) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
@@ -119,7 +129,7 @@ func Grep(searchWord, directory string) error {
 
 		if !info.IsDir() {
 			wg.Add(1)
-			go processFile(searchWord, path, directory, &wg, &mtx, &matchCount)
+			go processFile(searchWord, path, directory, classMode, &wg, &mtx, &matchCount)
 		}
 		return nil
 	})
