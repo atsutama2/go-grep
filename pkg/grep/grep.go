@@ -5,49 +5,87 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strings"
+	"sync"
 )
 
-func SearchFiles(pattern string, root string) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			if err := grep(pattern, path); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+type SearchResult struct {
+	LineNumber int
+	Line       string
 }
 
-func grep(pattern string, path string) error {
+func highlight(text, searchWord string) string {
+	return strings.ReplaceAll(text, searchWord, "\033[1;31m"+searchWord+"\033[0m")
+}
+
+func colorPath(path string) string {
+	return "\033[1;34m\033[1m" + path + "\033[0m"
+}
+
+func processFile(searchWord, path, directory string, wg *sync.WaitGroup, mtx *sync.Mutex) {
+	defer wg.Done()
+
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		mtx.Lock()
+		fmt.Printf("Error: %v\n", err)
+		mtx.Unlock()
+		return
 	}
 	defer file.Close()
 
-	re, err := regexp.Compile(pattern)
+	scanner := bufio.NewScanner(file)
+	lineNumber := 1
+
+	var results []SearchResult
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, searchWord) {
+			results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
+		}
+		lineNumber++
+	}
+
+	if err := scanner.Err(); err != nil {
+		mtx.Lock()
+		fmt.Printf("Error: %v\n", err)
+		mtx.Unlock()
+	}
+
+	if len(results) > 0 {
+		relPath, _ := filepath.Rel(directory, path)
+
+		mtx.Lock()
+		fmt.Printf("%s\n", colorPath(relPath))
+		for _, result := range results {
+			fmt.Printf("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
+		}
+		fmt.Println()
+		mtx.Unlock()
+	}
+}
+
+func Grep(searchWord, directory string) error {
+	var wg sync.WaitGroup
+	var mtx sync.Mutex
+
+	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			wg.Add(1)
+			go processFile(searchWord, path, directory, &wg, &mtx)
+		}
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	scanner := bufio.NewScanner(file)
-	lineNumber := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		lineNumber++
-		if re.MatchString(line) {
-			absPath, _ := filepath.Abs(path)
-			fmt.Printf("%s:%d:%s\n", absPath, lineNumber, line)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
+	wg.Wait()
 	return nil
 }
