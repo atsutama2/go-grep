@@ -21,6 +21,7 @@ Then, navigate to the project directory and build the `gg` binary:
 ```
 cd go-grep
 make build
+sudo mv gg /usr/local/bin
 ```
 Then, navigate to the project directory and build the `gg` binary:
 
