@@ -49,6 +49,8 @@ To use `gg`, execute the binary followed by the search pattern and the directory
 ./gg Apple testdata/
 ```
 
+![スクリーンショット 2023-04-03 18 25 46](https://user-images.githubusercontent.com/77330599/229469245-e5e40f71-263f-4f3c-9cfd-2144d9b50675.png)
+
 
 The output will display the relative file path, line number, and the line containing the search pattern, with the search pattern highlighted.
 
