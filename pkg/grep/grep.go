@@ -93,7 +93,12 @@ func Grep(searchWord, directory string) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
-	excludeList := []string{".git"} // 検索対象から除外するファイル/ディレクトリのリスト
+	excludeList := []string{
+		".git",
+		"vendor",
+		".vscode",
+		"node_modules",
+		"_build"} // 検索対象から除外するファイル/ディレクトリのリスト
 
 	var matchCount int32 // 検索結果のカウント用の変数を追加
 
