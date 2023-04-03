@@ -19,7 +19,7 @@ Then, navigate to the project directory and build the `gg` binary:
 
 ```
 cd go-grep
-go build ./cmd/gg
+make build
 ```
 Then, navigate to the project directory and build the `gg` binary:
 
