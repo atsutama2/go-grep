@@ -1,0 +1,32 @@
+[
+    {
+      "name": "Apple",
+      "category": "Fruit",
+      "price": 1.2
+    },
+    {
+      "name": "Banana",
+      "category": "Fruit",
+      "price": 0.8
+    },
+    {
+      "name": "Elephant",
+      "category": "Animal",
+      "price": null
+    },
+    {
+      "name": "Giraffe",
+      "category": "Animal",
+      "price": null
+    },
+    {
+      "name": "Red",
+      "category": "Color",
+      "price": null
+    },
+    {
+      "name": "Blue",
+      "category": "Color",
+      "price": null
+    }
+  ]
