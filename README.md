@@ -1,6 +1,6 @@
 # go-grep (gg)
 
-`go-grep` (also known as `gg`) is a simple command-line tool written in Go that mimics the functionality of the Unix `grep` command. It searches for a specified text pattern in one or more files within a given directory and its subdirectories.
+高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
 
 ## Features
 
