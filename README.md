@@ -4,28 +4,28 @@
 [![codecov](https://codecov.io/gh/atsutama2/go-grep/branch/main/graph/badge.svg?token=DPGXS4UDAP)](https://codecov.io/gh/atsutama2/go-grep)
 
 高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。
-大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
 ---
-`go-grep` is a fast and versatile text search tool written in Go as a command-line tool. It efficiently searches text within files and directories, matching without regard to case, and allowing exclusion of specific files or directories.
+`go-grep` is a fast and versatile text search tool written in Go that allows for efficient searching of text within files and directories from the command line.
 
 ## Features
 
-- 検索パターンを含む行番号を表示します。
-- 検索パターンを含むファイルの相対パスを表示します。
-- ディレクトリが指定されていない場合は現在のディレクトリから検索を開始します。
-- 出力に検索パターンをハイライト表示します。
-- Method名検索
-- 指定されたディレクトリ内のファイルやサブディレクトリを再帰的に検索します。
-- 検索中に、検索対象外とするファイル名やディレクトリ名を指定することができます。例えば、.git や vendor など。
-- 検索中に検索対象外とされたファイルやディレクトリはスキップされます。
-- 除外ファイルの格納場所は $HOME/go-grep/exclude_list.txt になります。
-- つまり、ユーザーのホームディレクトリ内に go-grep ディレクトリがある必要があり、その中に exclude_list.txt ファイルを配置する必要があります。もしディレクトリが存在しない場合は、自分で作成する必要があります。
+- 検索対象のファイルにおいて、検索パターンが含まれる行番号や相対パスを表示します。
+- ディレクトリが指定されていない場合は、現在のディレクトリから検索を開始します。
+- 出力には検索パターンがハイライト表示されます。
+- Method名による検索が可能です。
+- 検索中に、検索対象外とするファイル名やディレクトリ名を指定することができます。
+- 除外ファイルの格納場所は `$HOME/go-grep/exclude_list.txt` であり、ユーザーのホームディレクトリ内に `go-grep` ディレクトリを作成し、その中に `exclude_list.txt` ファイルを配置する必要があります。
 ---
 - Displays line numbers containing the search pattern.
 - Displays the relative file path of the file containing the search pattern.
 - Starts the search from the current directory if no directory is specified.
 - Highlights the search pattern in the output.
-- Shows the total number of matches found.
+- Searches for method names.
+- Recursively searches for files and subdirectories in the specified directory.
+- Allows exclusion of files and directories during the search. For example, .git or vendor.
+- Skips files and directories that are excluded during the search.
+- The location to store the exclude list file is $HOME/go-grep/exclude_list.txt.
+- This means that you need to have a go-grep directory in your home directory and place the exclude_list.txt file in it. If the directory does not exist, you need to create it yourself.
 
 ## Installation
 
