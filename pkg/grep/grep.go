@@ -36,19 +36,36 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
-func processFile(searchWord, path, directory string, classMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32) {
+func processFile(searchWord, path, directory string, classMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
 	defer wg.Done()
+
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		mtx.Lock()
+		printfFunc("Error: %v\n", err)
+		mtx.Unlock()
+		return
+	}
+
+	if fileInfo.IsDir() {
+		return
+	}
 
 	file, err := os.Open(path)
 	if err != nil {
 		mtx.Lock()
-		fmt.Printf("Error: %v\n", err)
+		printfFunc("Error: %v\n", err)
 		mtx.Unlock()
 		return
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+
+	// バッファサイズを増やす
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 10*1024*1024) // 10MBまで増やす
+
 	lineNumber := 1
 
 	var results []SearchResult
@@ -81,7 +98,7 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 
 	if err := scanner.Err(); err != nil {
 		mtx.Lock()
-		fmt.Printf("Error: %v\n", err)
+		printfFunc("Error: %v\n", err)
 		mtx.Unlock()
 	}
 
@@ -90,16 +107,16 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 		relPath, _ := filepath.Rel(directory, path)
 
 		mtx.Lock()
-		fmt.Printf("%s\n", colorPath(relPath))
+		printfFunc("%s\n", colorPath(relPath))
 		for _, result := range results {
-			fmt.Printf("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
+			printfFunc("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
 		}
-		fmt.Println()
+		printfFunc("\n")
 		mtx.Unlock()
 	}
 }
 
-func Grep(searchWord, directory string, classMode bool) error {
+func Grep(searchWord, directory string, classMode bool, printfFunc func(string, ...interface{}) (int, error)) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
@@ -112,27 +129,51 @@ func Grep(searchWord, directory string, classMode bool) error {
 
 	var matchCount int32 // 検索結果のカウント用の変数を追加
 
-	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+	// Create a semaphore
+	semaphore := make(chan struct{}, 10)
 
-		for _, exclude := range excludeList {
-			if info.Name() == exclude {
-				if info.IsDir() {
-					return filepath.SkipDir // ディレクトリをスキップ
-				} else {
-					return nil // ファイルをスキップ
+	// Add a new channel to signal the completion of filepath.Walk
+	walkDone := make(chan error)
+
+	go func() {
+		err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			for _, exclude := range excludeList {
+				if info.Name() == exclude {
+					if info.IsDir() {
+						return filepath.SkipDir // ディレクトリをスキップ
+					} else {
+						return nil // ファイルをスキップ
+					}
 				}
 			}
-		}
 
-		if !info.IsDir() {
+			if info.IsDir() {
+				return nil
+			}
+
+			// Acquire the semaphore
+			semaphore <- struct{}{}
+
 			wg.Add(1)
-			go processFile(searchWord, path, directory, classMode, &wg, &mtx, &matchCount)
-		}
-		return nil
-	})
+			go func() {
+				// Release the semaphore when the function completes
+				defer func() { <-semaphore }()
+				processFile(searchWord, path, directory, classMode, &wg, &mtx, &matchCount, printfFunc)
+			}()
+			return nil
+		})
+
+		// Signal the completion of filepath.Walk
+		walkDone <- err
+		close(walkDone)
+	}()
+
+	// Wait for filepath.Walk to complete
+	err := <-walkDone
 
 	if err != nil {
 		return err

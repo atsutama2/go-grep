@@ -31,7 +31,7 @@ func main() {
 		}
 	}
 
-	err := grep.Grep(searchWord, directory, classMode)
+	err := grep.Grep(searchWord, directory, classMode, fmt.Printf)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)

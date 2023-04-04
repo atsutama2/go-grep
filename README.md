@@ -13,6 +13,7 @@
 - 検索パターンを含むファイルの相対パスを表示します。
 - ディレクトリが指定されていない場合は現在のディレクトリから検索を開始します。
 - 出力に検索パターンをハイライト表示します。
+- Method名検索
 ---
 - Displays line numbers containing the search pattern.
 - Displays the relative file path of the file containing the search pattern.
