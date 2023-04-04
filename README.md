@@ -3,7 +3,8 @@
 [![Test](https://github.com/atsutama2/go-grep/actions/workflows/go.yml/badge.svg)](https://github.com/atsutama2/go-grep/actions/workflows/go.yml)
 [![codecov](https://codecov.io/gh/atsutama2/go-grep/branch/main/graph/badge.svg?token=DPGXS4UDAP)](https://codecov.io/gh/atsutama2/go-grep)
 
-高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
+高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。
+大文字小文字を区別せずにマッチングし、特定のファイルやディレクトリを除外できます。
 ---
 `go-grep` is a fast and versatile text search tool written in Go as a command-line tool. It efficiently searches text within files and directories, matching without regard to case, and allowing exclusion of specific files or directories.
 
@@ -14,6 +15,11 @@
 - ディレクトリが指定されていない場合は現在のディレクトリから検索を開始します。
 - 出力に検索パターンをハイライト表示します。
 - Method名検索
+- 指定されたディレクトリ内のファイルやサブディレクトリを再帰的に検索します。
+- 検索中に、検索対象外とするファイル名やディレクトリ名を指定することができます。例えば、.git や vendor など。
+- 検索中に検索対象外とされたファイルやディレクトリはスキップされます。
+- 除外ファイルの格納場所は $HOME/go-grep/exclude_list.txt になります。
+- つまり、ユーザーのホームディレクトリ内に go-grep ディレクトリがある必要があり、その中に exclude_list.txt ファイルを配置する必要があります。もしディレクトリが存在しない場合は、自分で作成する必要があります。
 ---
 - Displays line numbers containing the search pattern.
 - Displays the relative file path of the file containing the search pattern.
@@ -34,7 +40,6 @@ Then, navigate to the project directory and build the `gg` binary:
 ```
 cd go-grep
 make build
-sudo mv gg /usr/local/bin
 ```
 
 Then, navigate to the project directory and build the `gg` binary:
