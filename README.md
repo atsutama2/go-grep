@@ -56,6 +56,11 @@ To use `gg`, execute the binary followed by the search pattern and the directory
 gg <search_word> [<directory>]
 ```
 
+You can search for method names.
+```
+gg -class <method name>
+```
+
 ### Examples
 
 1. Search for the word "Apple" in the current directory:
