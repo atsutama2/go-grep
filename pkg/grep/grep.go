@@ -3,6 +3,7 @@ package grep
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -62,9 +63,8 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 
 	scanner := bufio.NewScanner(file)
 
-	// バッファサイズを増やす
-	buf := make([]byte, 0, 64*1024)
-	scanner.Buffer(buf, 10*1024*1024) // 10MBまで増やす
+	buf := make([]byte, 0, bufio.MaxScanTokenSize)
+	scanner.Buffer(buf, 10*bufio.MaxScanTokenSize)
 
 	lineNumber := 1
 
@@ -97,9 +97,16 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 	}
 
 	if err := scanner.Err(); err != nil {
-		mtx.Lock()
-		printfFunc("Error: %v\n", err)
-		mtx.Unlock()
+		if err == bufio.ErrTooLong {
+			mtx.Lock()
+			fmt.Printf("Error: Skipping file with too long line: %s\n", path)
+			mtx.Unlock()
+			return
+		} else {
+			mtx.Lock()
+			fmt.Printf("Error: %v\n", err)
+			mtx.Unlock()
+		}
 	}
 
 	if len(results) > 0 {
@@ -120,12 +127,19 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
-	excludeList := []string{
-		".git",
-		"vendor",
-		".vscode",
-		"node_modules",
-		"_build"} // 検索対象から除外するファイル/ディレクトリのリスト
+	// $HOME/go-grep/exclude_list.txt ファイルのパスを取得
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("Error: failed to get user home directory: %v", err)
+	}
+	excludeListPath := filepath.Join(homeDir, "go-grep", "exclude_list.txt")
+
+	// excludeListPath から excludeList を読み込む
+	excludeListBytes, err := ioutil.ReadFile(excludeListPath)
+	if err != nil {
+		return fmt.Errorf("Error: failed to read exclude list file: %v", err)
+	}
+	excludeList := strings.Split(strings.TrimSpace(string(excludeListBytes)), "\n")
 
 	var matchCount int32 // 検索結果のカウント用の変数を追加
 
@@ -138,11 +152,11 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 	go func() {
 		err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				return fmt.Errorf("Error: failed to walk path %q: %v", path, err)
 			}
 
 			for _, exclude := range excludeList {
-				if info.Name() == exclude {
+				if strings.Contains(path, exclude) {
 					if info.IsDir() {
 						return filepath.SkipDir // ディレクトリをスキップ
 					} else {
@@ -152,6 +166,10 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 			}
 
 			if info.IsDir() {
+				return nil
+			}
+
+			if (info.Mode() & os.ModeSocket) != 0 { // ディレクトリとソケットファイルをスキップします
 				return nil
 			}
 
@@ -173,7 +191,7 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 	}()
 
 	// Wait for filepath.Walk to complete
-	err := <-walkDone
+	err = <-walkDone
 
 	if err != nil {
 		return err
