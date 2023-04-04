@@ -74,7 +74,8 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 		line := scanner.Text()
 
 		if classMode {
-			match, err := regexp.MatchString(`func\s+`+searchWord+`\s*\(.*\)`, line)
+			match, err := regexp.MatchString(`^func\s+((\([^\)]+\)\s+)?`+regexp.QuoteMeta(searchWord)+`)\s*\(.*\)`, line)
+
 			if err != nil {
 				continue
 			}
