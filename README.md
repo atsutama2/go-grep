@@ -49,6 +49,26 @@ Then, navigate to the project directory and build the `gg` binary:
 gg <search_word> [<directory>]
 ```
 
+The location for excluding files is as follows:
+Please create exclude_list.txt.
+```
+$HOME/go-grep/exclude_list.txt
+```
+
+For example, it could look like this:
+```
+.git
+vendor
+.vscode
+node_modules
+_build
+lib
+pkg/mod
+data
+*.idb
+bin/gopls
+```
+
 ## Usage
 
 To use `gg`, execute the binary followed by the search pattern and the directory to start the search (optional). If no directory is specified, the search will start from the current directory.
