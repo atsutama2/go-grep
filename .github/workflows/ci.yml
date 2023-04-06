@@ -1,0 +1,52 @@
+on:
+  push:
+  pull_request:
+
+name: CI
+
+env:
+  GO_VERSION: 1.18
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Code
+        uses: actions/checkout@v3
+      - name: Check diff between gofmt and code
+        run: diff <(gofmt -d .) <(echo -n)
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Code
+        uses: actions/checkout@v3
+      - run: go test -v -race ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Code
+        uses: actions/checkout@v3
+      - name: Go vet
+        run: go vet -x ./...
+
+      - name: GolangCI-Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.45.2
+          only-new-issues: ${{ github.event_name == 'pull_request' }}
+          skip-pkg-cache: true
+          skip-build-cache: true
