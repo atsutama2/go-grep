@@ -43,10 +43,9 @@ jobs:
       - name: Go vet
         run: go vet -x ./...
 
-      - name: GolangCI-Lint
+      - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.45.2
-          only-new-issues: ${{ github.event_name == 'pull_request' }}
+          version: v1.46.2
           skip-pkg-cache: true
           skip-build-cache: true
