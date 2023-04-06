@@ -43,7 +43,9 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		mtx.Lock()
-		printfFunc("Error: %v\n", err)
+		if _, printErr := printfFunc("Error: %v\n", err); printErr != nil {
+			fmt.Printf("Error printing: %v\n", printErr)
+		}
 		mtx.Unlock()
 		return
 	}
@@ -55,7 +57,9 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 	file, err := os.Open(path)
 	if err != nil {
 		mtx.Lock()
-		printfFunc("Error: %v\n", err)
+		if _, printErr := printfFunc("Error: %v\n", err); printErr != nil {
+			fmt.Printf("Error printing: %v\n", printErr)
+		}
 		mtx.Unlock()
 		return
 	}
@@ -115,11 +119,17 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 		relPath, _ := filepath.Rel(directory, path)
 
 		mtx.Lock()
-		printfFunc("%s\n", colorPath(relPath))
-		for _, result := range results {
-			printfFunc("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
+		if _, err := printfFunc("%s\n", colorPath(relPath)); err != nil {
+			fmt.Printf("Error printing: %v\n", err)
 		}
-		printfFunc("\n")
+		for _, result := range results {
+			if _, err := printfFunc("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord)); err != nil {
+				fmt.Printf("Error printing: %v\n", err)
+			}
+		}
+		if _, err := printfFunc("\n"); err != nil {
+			fmt.Printf("Error printing: %v\n", err)
+		}
 		mtx.Unlock()
 	}
 }
