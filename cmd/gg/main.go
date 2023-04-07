@@ -11,6 +11,8 @@ import (
 func main() {
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
 	classFlag := flag.Bool("class", false, "Search for method names")
+	structFlag := flag.Bool("struct", false, "Search for struct names")
+
 	flag.Parse()
 
 	if *versionFlag {
@@ -26,6 +28,7 @@ func main() {
 
 	var searchWord, directory string
 	classMode := *classFlag
+	structMode := *structFlag
 
 	searchWord = args[0]
 	directory = "."
@@ -33,7 +36,7 @@ func main() {
 		directory = args[1]
 	}
 
-	err := grep.Grep(searchWord, directory, classMode, fmt.Printf)
+	err := grep.Grep(searchWord, directory, classMode, structMode, fmt.Printf)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
