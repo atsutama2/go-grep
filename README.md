@@ -110,9 +110,6 @@ pkg/grep/grep.go
 Total matches: 1
 ```
 
-![スクリーンショット 2023-04-04 17 20 17](https://user-images.githubusercontent.com/77330599/229732269-ad940549-ca42-43e9-8e19-551e727fc11d.png)
-![スクリーンショット 2023-04-04 17 19 56](https://user-images.githubusercontent.com/77330599/229732291-3954216b-ecb7-4572-a48b-c990de927cab.png)
-
 ### Examples
 
 1. Search for the word "Apple" in the current directory:
