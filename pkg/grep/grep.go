@@ -37,13 +37,15 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
-func processFile(searchWord, path, directory string, classMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
+func processFile(searchWord, path, directory string, classMode, structMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
 	defer wg.Done()
 
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		mtx.Lock()
-		printfFunc("Error: %v\n", err)
+		if _, printErr := printfFunc("Error: %v\n", err); printErr != nil {
+			fmt.Printf("Error printing: %v\n", printErr)
+		}
 		mtx.Unlock()
 		return
 	}
@@ -55,7 +57,9 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 	file, err := os.Open(path)
 	if err != nil {
 		mtx.Lock()
-		printfFunc("Error: %v\n", err)
+		if _, printErr := printfFunc("Error: %v\n", err); printErr != nil {
+			fmt.Printf("Error printing: %v\n", printErr)
+		}
 		mtx.Unlock()
 		return
 	}
@@ -73,7 +77,15 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		if classMode {
+		if structMode {
+			match, err := regexp.MatchString(`^type\s+`+regexp.QuoteMeta(searchWord)+`\s+struct\s*\{`, line)
+			if err != nil {
+				continue
+			}
+			if match {
+				results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
+			}
+		} else if classMode {
 			match, err := regexp.MatchString(`^func\s+((\([^\)]+\)\s+)?`+regexp.QuoteMeta(searchWord)+`)\s*\(.*\)`, line)
 
 			if err != nil {
@@ -115,16 +127,22 @@ func processFile(searchWord, path, directory string, classMode bool, wg *sync.Wa
 		relPath, _ := filepath.Rel(directory, path)
 
 		mtx.Lock()
-		printfFunc("%s\n", colorPath(relPath))
-		for _, result := range results {
-			printfFunc("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord))
+		if _, err := printfFunc("%s\n", colorPath(relPath)); err != nil {
+			fmt.Printf("Error printing: %v\n", err)
 		}
-		printfFunc("\n")
+		for _, result := range results {
+			if _, err := printfFunc("%d:%s\n", result.LineNumber, highlight(result.Line, searchWord)); err != nil {
+				fmt.Printf("Error printing: %v\n", err)
+			}
+		}
+		if _, err := printfFunc("\n"); err != nil {
+			fmt.Printf("Error printing: %v\n", err)
+		}
 		mtx.Unlock()
 	}
 }
 
-func Grep(searchWord, directory string, classMode bool, printfFunc func(string, ...interface{}) (int, error)) error {
+func Grep(searchWord, directory string, classMode, structMode bool, printfFunc func(string, ...interface{}) (int, error)) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
@@ -156,13 +174,31 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 				return fmt.Errorf("Error: failed to walk path %q: %v", path, err)
 			}
 
+			skip := false
 			for _, exclude := range excludeList {
-				if strings.Contains(path, exclude) {
-					if info.IsDir() {
-						return filepath.SkipDir // ディレクトリをスキップ
-					} else {
-						return nil // ファイルをスキップ
+				if strings.HasSuffix(exclude, "/") {
+					exclude = strings.TrimSuffix(exclude, "/")
+					if strings.Contains(filepath.ToSlash(filepath.Dir(path)), exclude) {
+						skip = true
+						break
 					}
+				} else if strings.HasPrefix(exclude, "*") {
+					if strings.HasSuffix(info.Name(), exclude[1:]) {
+						skip = true
+						break
+					}
+				} else {
+					if info.Name() == exclude {
+						skip = true
+						break
+					}
+				}
+			}
+			if skip {
+				if info.IsDir() {
+					return filepath.SkipDir // ディレクトリをスキップ
+				} else {
+					return nil // ファイルをスキップ
 				}
 			}
 
@@ -181,7 +217,7 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 			go func() {
 				// Release the semaphore when the function completes
 				defer func() { <-semaphore }()
-				processFile(searchWord, path, directory, classMode, &wg, &mtx, &matchCount, printfFunc)
+				processFile(searchWord, path, directory, classMode, structMode, &wg, &mtx, &matchCount, printfFunc)
 			}()
 			return nil
 		})

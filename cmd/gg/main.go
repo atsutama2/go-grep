@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -8,30 +9,34 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	versionFlag := flag.Bool("version", false, "Show the version of gg")
+	classFlag := flag.Bool("class", false, "Search for method names")
+	structFlag := flag.Bool("struct", false, "Search for struct names")
+
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("gg version: %s\n", grep.Version)
+		return
+	}
+
+	args := flag.Args()
+	if len(args) < 1 {
 		fmt.Println("Usage: gg <search_word> [<directory>] | gg -class <search_word> [<directory>]")
 		os.Exit(1)
 	}
 
 	var searchWord, directory string
-	var classMode bool
+	classMode := *classFlag
+	structMode := *structFlag
 
-	if os.Args[1] == "-class" {
-		classMode = true
-		searchWord = os.Args[2]
-		directory = "."
-		if len(os.Args) == 4 {
-			directory = os.Args[3]
-		}
-	} else {
-		searchWord = os.Args[1]
-		directory = "."
-		if len(os.Args) == 3 {
-			directory = os.Args[2]
-		}
+	searchWord = args[0]
+	directory = "."
+	if len(args) == 2 {
+		directory = args[1]
 	}
 
-	err := grep.Grep(searchWord, directory, classMode, fmt.Printf)
+	err := grep.Grep(searchWord, directory, classMode, structMode, fmt.Printf)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
