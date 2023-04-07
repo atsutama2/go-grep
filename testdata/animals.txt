@@ -1,2 +1,0 @@
-Elephant is an animal.
-Giraffe is also an animal.

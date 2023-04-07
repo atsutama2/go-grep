@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/atsutama2/go-grep/"
 )
 
 func main() {
@@ -16,7 +14,6 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Printf("gg version: %s\n", grep.Version)
 		return
 	}
 
@@ -36,7 +33,7 @@ func main() {
 		directory = args[1]
 	}
 
-	err := grep.Grep(searchWord, directory, funcMode, structMode, fmt.Printf)
+	err := Grep(searchWord, directory, funcMode, structMode, fmt.Printf)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
