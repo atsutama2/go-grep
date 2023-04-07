@@ -1,6 +1,6 @@
 # go-grep (gg)
 [![GitHub license](https://img.shields.io/github/license/onozaty/json2csv)](https://github.com/onozaty/json2csv/blob/main/LICENSE)
-[![Test](https://github.com/atsutama2/go-grep/actions/workflows/go.yml/badge.svg)](https://github.com/atsutama2/go-grep/actions/workflows/go.yml)
+[![Test](https://github.com/atsutama2/go-grep/actions/workflows/ci.yml/badge.svg)](https://github.com/atsutama2/go-grep/actions/workflows/ci.yml)
 
 高速で汎用性のあるテキスト検索ツール`go-grep`は、Goで書かれたコマンドラインツールで、ファイルやディレクトリ内のテキストを効率的に検索できます。
 ---
