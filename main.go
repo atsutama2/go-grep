@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/atsutama2/go-grep/pkg/grep"
+	"github.com/atsutama2/go-grep/"
 )
 
 func main() {
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
-	classFlag := flag.Bool("class", false, "Search for method names")
+	funcFlag := flag.Bool("func", false, "Search for function names")
 	structFlag := flag.Bool("struct", false, "Search for struct names")
 
 	flag.Parse()
@@ -22,12 +22,12 @@ func main() {
 
 	args := flag.Args()
 	if len(args) < 1 {
-		fmt.Println("Usage: gg <search_word> [<directory>] | gg -class <search_word> [<directory>]")
+		fmt.Println("Usage: gg <search_word> [<directory>] | gg -func <search_word> [<directory>]")
 		os.Exit(1)
 	}
 
 	var searchWord, directory string
-	classMode := *classFlag
+	funcMode := *funcFlag
 	structMode := *structFlag
 
 	searchWord = args[0]
@@ -36,7 +36,7 @@ func main() {
 		directory = args[1]
 	}
 
-	err := grep.Grep(searchWord, directory, classMode, structMode, fmt.Printf)
+	err := grep.Grep(searchWord, directory, funcMode, structMode, fmt.Printf)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
