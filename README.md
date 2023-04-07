@@ -20,7 +20,8 @@
 - Displays the relative file path of the file containing the search pattern.
 - Starts the search from the current directory if no directory is specified.
 - Highlights the search pattern in the output.
-- Searches for method names. (go olny)
+- Search for function names (-func)
+- Search for struct names (-struct)
 - Recursively searches for files and subdirectories in the specified directory.
 - Allows exclusion of files and directories during the search. For example, .git or vendor.
 - Skips files and directories that are excluded during the search.
