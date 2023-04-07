@@ -11,7 +11,8 @@
 - 検索対象のファイルにおいて、検索パターンが含まれる行番号や相対パスを表示します。
 - ディレクトリが指定されていない場合は、現在のディレクトリから検索を開始します。
 - 出力には検索パターンがハイライト表示されます。
-- Method名による検索が可能です。(goのみ)
+- 関数名の検索。(-func)
+- 構造体名の検索。(-struct)
 - 検索中に、検索対象外とするファイル名やディレクトリ名を指定することができます。
 - 除外ファイルの格納場所は `$HOME/go-grep/exclude_list.txt` であり、ユーザーのホームディレクトリ内に `go-grep` ディレクトリを作成し、その中に `exclude_list.txt` ファイルを配置する必要があります。
 ---
@@ -57,16 +58,19 @@ $HOME/go-grep/exclude_list.txt
 
 For example, it could look like this:
 ```
-.git
-vendor
-.vscode
-node_modules
-_build
-lib
-pkg/mod
-data
-*.idb
-bin/gopls
+.git/
+vendor/
+.vscode/
+node_modules/
+_build/
+lib/
+pkg/
+shardkey/
+data/
+bin/
+gopls/
+golangci-lint
+coverage.html
 ```
 
 ## Usage
@@ -94,7 +98,7 @@ gg -class <method name>
 ```
 
 ```
-atsutama2: ~/go/tmp/go-grep (feature/base-grep %=)$ gg -class processFile
+atsutama2: ~/go/tmp/go-grep (feature/base-grep %=)$ gg -func processFile
 pkg/grep/grep.go
 40:func processFile(searchWord, path, directory string, classMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
 

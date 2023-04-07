@@ -1,4 +1,4 @@
-package grep
+package main
 
 import (
 	"bufio"
@@ -37,7 +37,7 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
-func processFile(searchWord, path, directory string, classMode, structMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
+func processFile(searchWord, path, directory string, funcMode, structMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
 	defer wg.Done()
 
 	fileInfo, err := os.Stat(path)
@@ -85,7 +85,7 @@ func processFile(searchWord, path, directory string, classMode, structMode bool,
 			if match {
 				results = append(results, SearchResult{LineNumber: lineNumber, Line: line})
 			}
-		} else if classMode {
+		} else if funcMode {
 			match, err := regexp.MatchString(`^func\s+((\([^\)]+\)\s+)?`+regexp.QuoteMeta(searchWord)+`)\s*\(.*\)`, line)
 
 			if err != nil {
@@ -142,7 +142,7 @@ func processFile(searchWord, path, directory string, classMode, structMode bool,
 	}
 }
 
-func Grep(searchWord, directory string, classMode, structMode bool, printfFunc func(string, ...interface{}) (int, error)) error {
+func Grep(searchWord, directory string, funcMode, structMode bool, printfFunc func(string, ...interface{}) (int, error)) error {
 	var wg sync.WaitGroup
 	var mtx sync.Mutex
 
@@ -217,7 +217,7 @@ func Grep(searchWord, directory string, classMode, structMode bool, printfFunc f
 			go func() {
 				// Release the semaphore when the function completes
 				defer func() { <-semaphore }()
-				processFile(searchWord, path, directory, classMode, structMode, &wg, &mtx, &matchCount, printfFunc)
+				processFile(searchWord, path, directory, funcMode, structMode, &wg, &mtx, &matchCount, printfFunc)
 			}()
 			return nil
 		})
