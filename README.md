@@ -94,7 +94,12 @@ Total matches: 4
 
 You can search for method names.
 ```
-gg -class <method name>
+gg -func <method name>
+```
+
+Search for struct names.
+```
+gg -struct <method name>
 ```
 
 ```
