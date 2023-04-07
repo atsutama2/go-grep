@@ -166,13 +166,25 @@ func Grep(searchWord, directory string, classMode bool, printfFunc func(string, 
 				return fmt.Errorf("Error: failed to walk path %q: %v", path, err)
 			}
 
+			skip := false
 			for _, exclude := range excludeList {
-				if strings.Contains(path, exclude) {
-					if info.IsDir() {
-						return filepath.SkipDir // ディレクトリをスキップ
-					} else {
-						return nil // ファイルをスキップ
+				if strings.HasPrefix(exclude, "*") {
+					if strings.HasSuffix(info.Name(), exclude[1:]) {
+						skip = true
+						break
 					}
+				} else {
+					if info.Name() == exclude {
+						skip = true
+						break
+					}
+				}
+			}
+			if skip {
+				if info.IsDir() {
+					return filepath.SkipDir // ディレクトリをスキップ
+				} else {
+					return nil // ファイルをスキップ
 				}
 			}
 
