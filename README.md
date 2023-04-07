@@ -99,7 +99,7 @@ gg -func <method name>
 
 Search for struct names.
 ```
-gg -struct <method name>
+gg -struct <struct name>
 ```
 
 ```
