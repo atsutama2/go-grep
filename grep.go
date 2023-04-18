@@ -37,6 +37,23 @@ func colorPath(path string) string {
 	return "\033[1;34m\033[1m" + path + "\033[0m"
 }
 
+func shouldExclude(path string, excludes []string) bool {
+	for _, exclude := range excludes {
+		// ディレクトリ名を取得
+		dirName := getDirectoryName(path)
+		// ディレクトリ名が完全一致の場合は除外
+		if dirName == exclude {
+			return true
+		}
+	}
+	return false
+}
+
+func getDirectoryName(path string) string {
+	dir, _ := filepath.Split(path)
+	return filepath.Base(dir)
+}
+
 func processFile(searchWord, path, directory string, funcMode, structMode bool, wg *sync.WaitGroup, mtx *sync.Mutex, matchCount *int32, printfFunc func(string, ...interface{}) (int, error)) {
 	defer wg.Done()
 
@@ -174,27 +191,7 @@ func Grep(searchWord, directory string, funcMode, structMode bool, printfFunc fu
 				return fmt.Errorf("Error: failed to walk path %q: %v", path, err)
 			}
 
-			skip := false
-			for _, exclude := range excludeList {
-				if strings.HasSuffix(exclude, "/") {
-					exclude = strings.TrimSuffix(exclude, "/")
-					if strings.Contains(filepath.ToSlash(filepath.Dir(path)), exclude) {
-						skip = true
-						break
-					}
-				} else if strings.HasPrefix(exclude, "*") {
-					if strings.HasSuffix(info.Name(), exclude[1:]) {
-						skip = true
-						break
-					}
-				} else {
-					if info.Name() == exclude {
-						skip = true
-						break
-					}
-				}
-			}
-			if skip {
+			if shouldExclude(path, excludeList) {
 				if info.IsDir() {
 					return filepath.SkipDir // ディレクトリをスキップ
 				} else {

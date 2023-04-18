@@ -14,6 +14,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
+		fmt.Printf("gg version: %s\n", Version)
 		return
 	}
 
