@@ -1,0 +1,13 @@
+Release at <%= Time.now.strftime("%Y-%m-%d %R") %>
+
+## リリースノート
+<%= ENV['RELEASE_NOTE_LINK'] %>
+
+## 確認
+- [ ] リリースノートの更新
+- [ ] 配布前の作業の実施
+
+## 更新内容
+<% pull_requests.each do |pr| -%>
+<%=  pr.to_checklist_item %>
+<% end -%>

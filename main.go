@@ -7,6 +7,12 @@ import (
 )
 
 func main() {
+
+	fmt.Println("test1")
+	fmt.Println("test2")
+	fmt.Println("test3")
+	fmt.Println("test4")
+
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
 	funcFlag := flag.Bool("func", false, "Search for function names")
 	structFlag := flag.Bool("struct", false, "Search for struct names")
@@ -14,6 +20,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
+		fmt.Printf("gg version: %s\n", Version)
 		return
 	}
 
