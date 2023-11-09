@@ -14,6 +14,7 @@ func main() {
 	fmt.Println("test3")
 	fmt.Println("test4")
 	fmt.Println("test5")
+	fmt.Println("test6")
 
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
 	funcFlag := flag.Bool("func", false, "Search for function names")
