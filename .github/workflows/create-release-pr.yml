@@ -10,4 +10,4 @@ jobs:
     uses: atsutama2/auto-release-pr/.github/workflows/create-release-pr.yml@develop
     secrets:
       releaseNoteLink: ${{ secrets.RELEASE_NOTE_LINK }}
-      accessToken: ${{ secrets.ACCESS_TOKEN }}
+      accessToken: ${{ secrets.GITHUB_TOKEN }}
