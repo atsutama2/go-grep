@@ -9,6 +9,7 @@ import (
 func main() {
 
 	fmt.Println("Hello, World!")
+	fmt.Println("Hello, World!")
 
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
 	funcFlag := flag.Bool("func", false, "Search for function names")
