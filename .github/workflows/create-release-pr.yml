@@ -12,6 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Trigger Release PR Workflow
-        uses: atsutama2/auto-release-pr/.github/actions/create-pr-action@develop
+        uses: atsutama2/auto-release-pr/.github/workflows/create-pr-action@develop
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
