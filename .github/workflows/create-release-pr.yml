@@ -1,13 +1,12 @@
-name: Create Release PR
+name: Trigger Create Release PR Workflow
 
 on:
-  workflow_call:
-    secrets:
-      accessToken:
-        required: true
+  push:
+    branches:
+      - develop
 
 jobs:
-  trigger:
+  call-create-release-pr-workflow:
     uses: atsutama2/auto-release-pr/.github/workflows/create-release-pr.yml@develop
     secrets:
-      accessToken: ${{ secrets.ACCESS_TOKEN }}
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
