@@ -9,14 +9,6 @@ import (
 func main() {
 
 	fmt.Println("Hello, World!")
-	fmt.Println("test1")
-	fmt.Println("test2")
-	fmt.Println("test3")
-	fmt.Println("test4")
-	fmt.Println("test5")
-	fmt.Println("test6")
-	fmt.Println("test7")
-	fmt.Println("test8")
 
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
 	funcFlag := flag.Bool("func", false, "Search for function names")
