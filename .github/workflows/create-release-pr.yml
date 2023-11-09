@@ -9,4 +9,4 @@ jobs:
   call-create-release-pr-workflow:
     uses: atsutama2/auto-release-pr/.github/workflows/create-release-pr.yml@develop
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
