@@ -1,0 +1,17 @@
+name: Create Release PR
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Trigger Release PR Workflow
+        uses: atsutama2/auto-release-pr/.github/actions/create-pr-action@develop
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
