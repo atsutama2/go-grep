@@ -7,6 +7,6 @@ on:
 
 jobs:
   call-create-release-pr-workflow:
-    uses: atsutama2/auto-release-pr/.github/workflows/create-pr-workflow.yml@develop
+    uses: atsutama2/auto-release-pr/.github/workflows/create-release-pr.yml@develop
     with:
       github-token: ${{ secrets.GITHUB_TOKEN }}
