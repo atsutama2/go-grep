@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	fmt.Println("Hello, World!")
+	fmt.Println("test2")
 	fmt.Println("test1")
 
 	versionFlag := flag.Bool("version", false, "Show the version of gg")
